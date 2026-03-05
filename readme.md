@@ -7,13 +7,12 @@
 ## Solution Design
 
 ### Security
-- Considering the service is used by Casino businesses, a **safety mindset** is a critical rule during design and coding.
+- Considering the service is used by Casino businesses, so **safety mindset** is a critical rule during design and coding.
 - Always choose **thread-safe** classes/libs to process or store data.
   - Use SecureRandom instead of Random to generate session keys.
   - Use ConcurrentHashMap/ConcurrentSkipListSet to store data.
   - Use synchronized to handle key data-write logic.
-- Using Java's internal HTTP server class, firstly build **SecurityGate** to enhance network security in three ways:
-  - Do not trust any input data/info.
+- Using Java's internal HTTP server class, firstly build **SecurityGate** to enhance network security in three ways (DO NOT trust any input data/info):
   - Request path check for any abnormal or insecure access.
   - Request header check for any potential attacks.
   - Request parameter check for any illegal characters or injections.
