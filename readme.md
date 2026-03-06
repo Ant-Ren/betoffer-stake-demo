@@ -5,6 +5,7 @@
 - Do not use any external frameworks, except maybe for testing. You can use com.sun.net.httpserver.HttpServer for the http server.
 
 ## Folder Structure
+```
 stake
 ├── Main                    # Entry point: startup, security and routing
 ├── api                     # API layer
@@ -13,6 +14,7 @@ stake
 │   └── handler (HttpHandler -> SessionHandler, StakeHandler)
 ├── dto                     # Data transfer objects (SessionInfo, StakeEntry, UnsafeEvent ...)
 └── service                 # Service layer (SecurityService, SessionService, StakeService)
+```
 
 ## Solution Design
 
@@ -22,16 +24,17 @@ stake
   - Use SecureRandom instead of Random to generate session keys.
   - Use ConcurrentHashMap/ConcurrentSkipListSet to store data.
   - Use synchronized to handle key data-write logic.
-- Using Java's internal HTTP server class, firstly build **SecurityGate** to enhance network security in three ways (DO NOT trust any input data/info):
+- Using Java's internal HTTP server class, firstly build **SecurityService** to enhance network security in three ways (DO NOT trust any input data/info):
   - Request path check for any abnormal or insecure access.
   - Request header check for any potential attacks.
   - Request parameter check for any illegal characters or injections.
 - Record suspicious unsafe events with source data such as IP address, type, and detailed information.
 
 ### Business Logic
-- The key logic is to get the top 20 stakes per bet offer, and a customer can post additional stakes for the same betting offer. Also, a customer ID can appear at most once in the top 20 stakes. This alerts me to pay attention to these scenarios:
+- The key logic is to get the top 20 stakes per bet offer, and a customer can post additional stakes for the same betting offer. Also, a customer ID can appear at most once in the top 20 stakes. This alerts me to pay attention to two scenarios:
   - When a customer posts a stake for the same bet multiple times, the system only keep the highest stake for this customer.
   - During the top 20 stakes sorting, what if the last position includes multiple customers, such as 3 customers who all placed a stake of 100 and 100 is the 20th stake? Following common risk-management sense, since top stakes are about alerting the company to potential large losses, I chose to implement it by returning all the stakes at the 20th position, which means the list of top stakes may be longer than 20.
+- Another key point is to be careful about dirty reading during posting stakes and reading the top N stakes. Since both **ConcurrentHashMap** and **ConcurrentSkipListSet** are weakly consistent classes in Java trade off for high performance, dirty data may occur during cross-session and simultaneous requests if no locking is implemented. Therefore, it is necessary to design appropriate **synchronized** blocks to avoid this issue.
 
 ### Performance
 - Requrement mentioned the service need to be able to handle a lot of simultaneous requests, so business logic implementation should also consider the performance seriously.
