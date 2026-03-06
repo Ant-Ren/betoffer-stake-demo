@@ -39,7 +39,7 @@ final class StakeStore {
     private static final class PerOfferData {
         final ConcurrentHashMap<Integer, Integer> customerToStake = new ConcurrentHashMap<>();
         final ConcurrentSkipListSet<StakeEntry> sortedStakes = new ConcurrentSkipListSet<>(
-            Comparator.<StakeEntry>comparingInt(e -> e.stake).reversed().thenComparingInt(e -> e.customerId)
+            Comparator.<StakeEntry>comparingInt(e -> e.stake).reversed()
         );
     }
 
